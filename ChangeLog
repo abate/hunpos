@@ -1,3 +1,7 @@
+
+Pietro Abate, 2019.04.07
+	* [CHANGED] update build system and removed Cmake
+
 Peter Halacsy, 2007.06.30
-  * [CHANGED] viterbi beam width (theta) is no more hard wired in viterbi.ml Now it's a command line parameter (-b) with default value of 1000
-            
+	* [CHANGED] viterbi beam width (theta) is no more hard wired in viterbi.ml
+	Now it's a command line parameter (-b) with default value of 1000
