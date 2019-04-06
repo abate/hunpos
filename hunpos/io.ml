@@ -77,67 +77,58 @@ let iter_sentence_no_split chan f =
 
 *)
 let read_tagged_sentence chan =
-	let rec aux wacc tacc read=
-		try 
-		match Parse.split2 '\t' (input_line chan) with
-			word :: r when (String.length word) > 0 -> 
-				let gold = match r with
-					x :: r -> x
-					| _ -> ""
-				in
-				aux (word :: wacc) (gold::tacc) true
-			| _ -> (wacc, tacc)
-		with End_of_file -> if read then (wacc, tacc) else raise End_of_file
-	in
-	aux ([]) ([]) false
-	
-let read_fielded_sentence chan =
-	let rec aux acc read=
-		try 
-		let fields = Parse.split2 '\t' (input_line chan) in
-		match fields with
-			word :: r when (String.length word) > 0 -> 
-			
-				aux (fields :: acc)  true
-			| _ -> acc
-		with End_of_file -> if read then acc else raise End_of_file
-	in
-	aux [] false
-	
-let read_sentence chan =
-	let rec aux wacc read=
-		try 
-		 let line = input_line chan in
-		 if (String.length line) > 0 then 
-				aux (line :: wacc) true
-		 else wacc
-		with End_of_file -> if read then wacc else raise End_of_file
-	in
-	aux ([])  false
+  let rec aux wacc tacc read =
+    try
+      match Parse.split2 '\t' (input_line chan) with
+      | word :: r when String.length word > 0 ->
+          let gold = match r with x :: r -> x | _ -> "" in
+          aux (word :: wacc) (gold :: tacc) true
+      | _ -> (wacc, tacc)
+    with End_of_file -> if read then (wacc, tacc) else raise End_of_file
+  in
+  aux [] [] false
 
+let read_fielded_sentence chan =
+  let rec aux acc read =
+    try
+      let fields = Parse.split2 '\t' (input_line chan) in
+      match fields with
+      | word :: r when String.length word > 0 -> aux (fields :: acc) true
+      | _ -> acc
+    with End_of_file -> if read then acc else raise End_of_file
+  in
+  aux [] false
+
+let read_sentence chan =
+  let rec aux wacc read =
+    try
+      let line = input_line chan in
+      if String.length line > 0 then aux (line :: wacc) true else wacc
+    with End_of_file -> if read then wacc else raise End_of_file
+  in
+  aux [] false
 
 let iter_tagged_sentence chan f =
-	try
-		while(true) do
-			f (read_tagged_sentence chan)
-		done;
-	with End_of_file -> ()
-			
-	
+  try
+    while true do
+      f (read_tagged_sentence chan)
+    done
+  with End_of_file -> ()
+
 let iter_sentence chan f =
-	try
-		while(true) do
-			f (read_sentence chan)
-		done;
-	with End_of_file -> ()
-	
+  try
+    while true do
+      f (read_sentence chan)
+    done
+  with End_of_file -> ()
+
 let iter_fielded_sentence chan f =
-	try
-		while(true) do
-			f (read_fielded_sentence chan)
-		done;
-	with End_of_file -> ()
-	
+  try
+    while true do
+      f (read_fielded_sentence chan)
+    done
+  with End_of_file -> ()
+
 (*
 
 (* goes through the sentences of chan, calling f for each sentence *)
@@ -152,15 +143,16 @@ let iter_sentence chan f =
 
 ;;
 *)
-	
+
 let rec fold_tagged_sentence f a chan =
-	 try
-	 	let (words, tags) = read_tagged_sentence chan in
-		let sentence = List.combine words tags in
-	 	fold_tagged_sentence f (f a sentence) chan
-	with End_of_file -> a
+  try
+    let words, tags = read_tagged_sentence chan in
+    let sentence = List.combine words tags in
+    fold_tagged_sentence f (f a sentence) chan
+  with End_of_file -> a
 
 external unsafe_get : string -> int -> char = "%string_unsafe_get"
+
 external unsafe_set : bytes -> int -> char -> unit = "%string_unsafe_set"
 
 (** Return a copy of the argument, with all uppercase letters
@@ -170,16 +162,15 @@ external unsafe_set : bytes -> int -> char -> unit = "%string_unsafe_set"
    Return true if the original string had any uppercase charater.
  *)
 let lowercase s =
-	let changed = ref false in
-	let l = String.length s in
-	if l = 0 then (s, false) else begin
-		let r = Bytes.create l in
-	    for i = 0 to l - 1 do
-		 	let c = unsafe_get s i in
-			let c' = Char.lowercase c in
-			unsafe_set r i c';
-			if not !changed && c != c' then
-			 changed := true
-		done;
-        (Bytes.to_string r, !changed)
-	 end
+  let changed = ref false in
+  let l = String.length s in
+  if l = 0 then (s, false)
+  else
+    let r = Bytes.create l in
+    for i = 0 to l - 1 do
+      let c = unsafe_get s i in
+      let c' = Char.lowercase c in
+      unsafe_set r i c' ;
+      if (not !changed) && c != c' then changed := true
+    done ;
+    (Bytes.to_string r, !changed)

@@ -36,8 +36,8 @@ web:   {{:http://www.eleves.ens.fr/home/frisch}http://www.eleves.ens.fr/home/fri
    when they are found; it also gives the action for anonymous arguments
    and for the special option - (a single dash alone).
 *)
-   
-type opt = char * string * ((unit -> unit) option) * ((string -> unit) option)
+
+type opt = char * string * (unit -> unit) option * (string -> unit) option
 
 (**
    The specification for a single option is a tuple
@@ -76,11 +76,11 @@ type opt = char * string * ((unit -> unit) option) * ((string -> unit) option)
 
 *)
 
-(** [noshort='\000'] can be used when an option has no short form *)
 val noshort : char
+(** [noshort='\000'] can be used when an option has no short form *)
 
+val nolong : string
 (** [nolong=""] can be used when an option has no long form *)
-val nolong  : string
 
 (** Signals error on the command line *)
 exception Error of string
@@ -102,19 +102,18 @@ val parse_cmdline : opt list -> (string -> unit) -> unit
     Parse the command line in [Sys.argv] using [parse].
 *)
 
-
 (** {1 Useful actions and handlers} *)
 
-val set : 'a ref -> 'a -> ((unit -> unit) option)
+val set : 'a ref -> 'a -> (unit -> unit) option
 (** @return an action that gives a reference a given value *)
 
-val incr : int ref -> ((unit -> unit) option)
+val incr : int ref -> (unit -> unit) option
 (** @return an action that increments an [int] reference *)
 
-val append : string list ref -> ((string -> unit) option)
+val append : string list ref -> (string -> unit) option
 (** @return an handler that appends the argument to the end of a [string list]
    reference *)
 
-val atmost_once : string ref -> exn -> ((string -> unit) option)
+val atmost_once : string ref -> exn -> (string -> unit) option
 (** @return an handler that stores the argument in a [string] reference if
     it is empty, raises an exception otherwise *)
