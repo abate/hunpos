@@ -16,8 +16,8 @@ let rec compare ngram1 ngram2 n =
         let c = gram_compare t1 t2 in
         if c != 0 then c else compare h1 h2 (pred n)
     | [], [] -> 0 (* empties are equals *)
-    | t :: _, [] -> 1
-    | [], t :: _ -> -1
+    | _ :: _, [] -> 1
+    | [], _ :: _ -> -1
 
 let rec print ngram n print_fun =
   match ngram with

@@ -1,4 +1,3 @@
-module Hmm_tagger = Hmm_tagger
 open Getopt
 open Printf
 
@@ -96,7 +95,7 @@ let main () =
       proc_err (sprintf "%s\n\nPlease try: hunpos-tag -h\n" s) ) ;
   let hunmorph =
     if !morphtable = "" then (* using no morphtable *)
-      fun (s : string) -> raise Not_found
+      fun (_ : string) -> raise Not_found
     else
       let m = Morphtable.load !morphtable in
       Morphtable.tags m

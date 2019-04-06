@@ -81,7 +81,7 @@ let read_tagged_sentence chan =
     try
       match Parse.split2 '\t' (input_line chan) with
       | word :: r when String.length word > 0 ->
-          let gold = match r with x :: r -> x | _ -> "" in
+          let gold = match r with x :: _ -> x | _ -> "" in
           aux (word :: wacc) (gold :: tacc) true
       | _ -> (wacc, tacc)
     with End_of_file -> if read then (wacc, tacc) else raise End_of_file
@@ -93,7 +93,7 @@ let read_fielded_sentence chan =
     try
       let fields = Parse.split2 '\t' (input_line chan) in
       match fields with
-      | word :: r when String.length word > 0 -> aux (fields :: acc) true
+      | word :: _ when String.length word > 0 -> aux (fields :: acc) true
       | _ -> acc
     with End_of_file -> if read then acc else raise End_of_file
   in
@@ -133,7 +133,7 @@ let iter_fielded_sentence chan f =
 
 (* goes through the sentences of chan, calling f for each sentence *)
 let iter_sentence chan f =
-	let rec loop () = 
+	let rec loop () =
 		f (read_sentence chan);
 		loop()
 	in
@@ -169,7 +169,7 @@ let lowercase s =
     let r = Bytes.create l in
     for i = 0 to l - 1 do
       let c = unsafe_get s i in
-      let c' = Char.lowercase c in
+      let c' = Char.lowercase_ascii c in
       unsafe_set r i c' ;
       if (not !changed) && c != c' then changed := true
     done ;

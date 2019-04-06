@@ -12,7 +12,7 @@ let patterns =
 
 let matching r s =
   try
-    let ix = Str.search_forward r s 0 in
+    let _ = Str.search_forward r s 0 in
     true
   with Not_found -> false
 

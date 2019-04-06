@@ -62,13 +62,13 @@ module Make (M : Amap.S) = struct
           next_states
       in
       List.iter from_node current_nodes ;
-      (* now 1. add emission probs,  
-		       2. search for the max weight, 
-		       3. convert it to a list, 
+      (* now 1. add emission probs,
+		       2. search for the max weight,
+		       3. convert it to a list,
 		   but: if there is only one state,
-		   we don't need to do anything 
+		   we don't need to do anything
 		*)
-      let next_nodes = M.fold (fun state node l -> node :: l) [] next_nodes in
+      let next_nodes = M.fold (fun _state node l -> node :: l) [] next_nodes in
       if List.length next_nodes = 1 then next_nodes
       else
         let max = ref neg_infinity in

@@ -1,7 +1,14 @@
-type t 
+type t
+
 val create : unit -> t
+
 val toindex : t -> string -> int
+
 val toword : t -> int -> string
-val ngram_toindex : t-> string list -> int list
+
+val ngram_toindex : t -> string list -> int list
+
 val max : t -> int
+(*
 val fix_old_vocab : t -> t
+*)

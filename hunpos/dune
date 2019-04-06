@@ -1,0 +1,38 @@
+(dirs util)
+
+(library
+ (name        hunpos)
+ (public_name hunpos)
+ (modules
+  Hmm_tagger
+  Mfhash
+  Linear_interpolated_lm
+  Amap
+  Lexicon
+  Vocab
+  Suffix_guesser
+  Special_tokens
+  Io
+  Parse
+  Viterbi
+  Ngram
+  Morphtable
+  )
+ (synopsis "")
+ (libraries str))
+
+(executable
+ (name tagger)
+ (public_name tagger)
+ (modules Tagger)
+ (libraries getopt hunpos)
+ (flags -open Hunpos)
+ )
+
+(executable
+ (name trainer)
+ (public_name trainer)
+ (modules Trainer)
+ (libraries getopt hunpos)
+ (flags -open Hunpos)
+ )

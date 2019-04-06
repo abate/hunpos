@@ -48,7 +48,7 @@ module Make (M : Mfhash.S) = struct
     let aux word tags =
       (* we calculate the number of occurrences of the word *)
       let wfreq =
-        List.fold_left (fun wfreq (tag, tfreq) -> wfreq + tfreq) 0 tags
+        List.fold_left (fun wfreq (_tag, tfreq) -> wfreq + tfreq) 0 tags
       in
       f word wfreq tags
     in
@@ -56,5 +56,5 @@ module Make (M : Mfhash.S) = struct
 
   let find_nofreq lex w =
     let l = M.find lex w in
-    List.map (fun (tag, freq) -> tag) l
+    List.map (fun (tag, _freq) -> tag) l
 end

@@ -5,7 +5,7 @@ module TagProbLM = Linear_interpolated_lm.Make (struct
   module CMap = Mfhash.Int
   module WMap = Mfhash.Int
 
-  let bos = -1
+  let _bos = -1
 end)
 
 (* a kimeneti valoszinusegek
@@ -14,7 +14,7 @@ module ObsProbLM = Linear_interpolated_lm.Make (struct
   module CMap = Mfhash.Int
   module WMap = Mfhash.String
 
-  let bos = -1
+  let _bos = -1
 end)
 
 (* egy szonak milyen tagjei lehetnek *)
@@ -80,7 +80,7 @@ let add_sentence (m, stat) (words, tags) =
   let words = words @ ["<S>"] in
   let rec aux words tags =
     match (words, tags) with
-    | [wbos], [tbos] -> (* bos-t nem kell betenni *) ()
+    | [_wbos], [_bos] -> (* bos-t nem kell betenni *) ()
     | word :: word_tails, tag :: tag_tails ->
         stat.tokens <- stat.tokens + 1 ;
         ObsLexicon.add_word_tag m.obs_lex word tag ;
@@ -95,7 +95,7 @@ let add_sentence (m, stat) (words, tags) =
   in
   aux words tags
 
-let calculate_probs (m, stat) =
+let calculate_probs (m, _stat) =
   (* apriori cimke valoszinusegek szamitasa *)
   let total_freq = TagProbLM.total_context_freq m.tag_lm in
   let tag_types = Vocab.max m.tag_vocab in
@@ -170,9 +170,11 @@ let load file_name =
         the vocabulary table are noe longer the same. The following
         try-with checks for the error and applies the fix if
         neccessary. *)
-  try Vocab.toword m.tag_vocab 1 ; (m, stat) with Not_found ->
+  try ignore(Vocab.toword m.tag_vocab 1) ; (m, stat) with Not_found ->
+    assert false
+    (*
     ({m with tag_vocab= Vocab.fix_old_vocab m.tag_vocab}, stat)
-
+*)
 type seen_type = Seen | LowerCasedSeen | SpecialToken | UnSeen
 
 type observation =
@@ -184,9 +186,9 @@ type observation =
   ; mutable anals: string list
   ; mutable guessed: (string * float) list }
 
-let compile_tagger (m, stat) morphtable max_guessed_tags logtheta =
+let compile_tagger (m, _stat) morphtable max_guessed_tags logtheta =
   let tag_order = m.tag_order in
-  let emission_order = m.emission_order in
+  let _emission_order = m.emission_order in
   let ltagprob, ltagprobs =
     Suffix_guesser.guesser_from_trie m.low_suffixes m.theta
   in
@@ -194,7 +196,7 @@ let compile_tagger (m, stat) morphtable max_guessed_tags logtheta =
     Suffix_guesser.guesser_from_trie m.upp_suffixes m.theta
   in
   let suffix_accu = Array.make (Array.length m.apriori_tag_probs) 0.0 in
-  let suffix_accu_length = Array.length suffix_accu in
+  let _suffix_accu_length = Array.length suffix_accu in
   let max_known_tagid = Vocab.max m.tag_vocab in
   let module State = struct
     type t = int list
@@ -209,8 +211,8 @@ let compile_tagger (m, stat) morphtable max_guessed_tags logtheta =
               else if t1 > t2 then 1
               else compare h1 h2 (pred n)
           | [], [] -> 0 (* ha mindketto ures, akkor egyenloek *)
-          | t :: _, [] -> 1
-          | [], t :: _ -> -1
+          | _ :: _, [] -> 1
+          | [], _ :: _ -> -1
       in
       compare ng1 ng2 tag_order
 
@@ -235,7 +237,7 @@ let compile_tagger (m, stat) morphtable max_guessed_tags logtheta =
     let transition from =
       [(Ngram.add m.eos from, TagProbLM.wordprob m.tag_lm m.eos from)]
     in
-    let emission state = 1.0 in
+    let emission _state = 1.0 in
     (transition, emission)
   in
   (* fogja a feltoltott suffix_accu -t es abbol kivalaszt nehanyat, amivel tovabb
@@ -340,7 +342,7 @@ let compile_tagger (m, stat) morphtable max_guessed_tags logtheta =
         in
         if List.length obs.anals = 1 then
           let transition = anals2transtion_fun obs.anals in
-          let emission state = 0.0 in
+          let emission _state = 0.0 in
           (transition, emission)
         else
           let tagprobs, tagprob =
@@ -387,8 +389,12 @@ let compile_tagger (m, stat) morphtable max_guessed_tags logtheta =
     let word2observation w =
       {word= w; is_first= false; seen= Seen; oov= false; anals= []; guessed= []}
     in
-    let (first :: observations) =
+    let (first,observations) =
+      match
       List.map word2observation (List.rev ("<s>" :: words))
+      with
+      |h::t -> h,t
+      |_ -> assert false
     in
     first.is_first <- true ;
     let observations = first :: observations in

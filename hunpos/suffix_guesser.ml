@@ -44,7 +44,7 @@ let add_word trie n word tag count =
       let tagcounts = T.add tag (tagcount + count) tagcounts in
       (scount + count, tagcounts)
     in
-    let inherited_counts, new_counts =
+    let inherited_counts, _new_counts =
       match node with
       | Empty -> (legacy_counts, None)
       | Node (_, Some x) -> (x, Some (update x))
@@ -55,7 +55,7 @@ let add_word trie n word tag count =
         Node
           ( Terminal
           , if after_branch then Some (update inherited_counts) else None )
-    | Node (OneChild (c, child), x) when ix < stop ->
+    | Node (OneChild (c, child), _) when ix < stop ->
         (* after abc, we also insert bc. ; TODOMAGYAR eddigi gyerekhez adunk counts - ot *)
         (* bc utan bc -vel mi van? *)
         let child =
@@ -142,7 +142,10 @@ let guesser_from_trie trie theta =
   let trie_iterator word f =
     let start = String.length word - 1 in
     let stop = 0 in
-    let rec aux (Node (trie_node, tag_info)) legacy_counts ix =
+    let rec aux t legacy_counts ix =
+      match t with
+      |Empty -> assert false
+      |Node (trie_node, tag_info) ->
       let ((scount, tag_counts) as inherited_counts) =
         match tag_info with Some x -> x | _ -> legacy_counts
       in
@@ -178,8 +181,8 @@ let guesser_from_trie trie theta =
     for i = 0 to Array.length accu - 1 do
       accu.(i) <- 0.0
     done ;
-    let start = String.length word - 1 in
-    let stop = 0 in
+    let _start = String.length word - 1 in
+    let _stop = 0 in
     let roll_prob suff_count tag_counts =
       let calc_tag_prob tagid freq =
         let tag_prob = float freq /. suff_count in

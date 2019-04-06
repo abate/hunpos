@@ -2,7 +2,7 @@
     a file to a Set. The format is:
     1. one word per line
     2. word TAB tag1 TAB tag2
- 
+
  *)
 module SSet = Set.Make (String)
 
@@ -15,8 +15,8 @@ let load file =
       let line = input_line ic in
       let _ =
         match Parse.split2 '\t' line with
-        | [word] -> ()
-        | [word; ""] -> ()
+        | [_word] -> ()
+        | [_word; ""] -> ()
         | word :: anals ->
             let tags =
               List.fold_left (fun s a -> SSet.add a s) SSet.empty anals

@@ -116,18 +116,18 @@ module Make (M : Maps) :
         (* meg megyunk lefele *)
         match node with
         | Terminal (_, _) -> f level (node :: acc)
-        | Parent (freq, childs, words) ->
+        | Parent (_freq, childs, _words) ->
             let acc = node :: acc in
-            M.CMap.iter (fun gram child -> aux child acc (succ level)) childs
+            M.CMap.iter (fun _gram child -> aux child acc (succ level)) childs
     in
     aux context_node [] 0
 
   let total_context_freq node =
     match node with
     | Terminal (freq, _) -> freq
-    | Parent (freq, _, words) -> freq
+    | Parent (freq, _childs, _words) -> freq
 
-  let word_count_at_context node =
+  let _word_count_at_context node =
     let words = get_words_from_node node in
     M.WMap.size words
 
@@ -135,7 +135,7 @@ module Make (M : Maps) :
     let words = get_words_from_node node in
     M.WMap.iter f words
 
-  let iter_ngrams f trie =
+  let _iter_ngrams f trie =
     let rec aux node acc =
       iter_words (f acc) node ;
       match node with
@@ -184,7 +184,7 @@ module Make (M : Maps) :
               search_max tail (pred i) max maxi
           | _ -> (max, maxi)
         in
-        let max, maxi = search_max context_nodes (level + 1) 0.0 0 in
+        let _max, maxi = search_max context_nodes (level + 1) 0.0 0 in
         lambdas.(maxi) <- lambdas.(maxi) +. freq
       in
       let words = get_words_from_node (List.hd context_nodes) in
@@ -232,25 +232,25 @@ module Make (M : Maps) :
           | Terminal (_, _) -> ()
           | Parent (_, childs, _) ->
               M.CMap.iter
-                (fun gram child -> estimate_at_context child words tl)
+                (fun _gram child -> estimate_at_context child words tl)
                 childs )
     in
     (* first l0, then unigram... *)
     match Array.to_list lambdas with
-    | [] -> failwith "List.length lambdas < 1"
+    | [] | _::[] -> failwith "List.length lambdas < 1"
     | l0 :: l1 :: lambdas ->
         let null_context_freq, childs, words =
           match context_trie with
-          | Terminal (freq, words) -> failwith "empty context_trie"
+          | Terminal (_freq, _words) -> failwith "empty context_trie"
           | Parent (freq, childs, words) -> (freq, childs, words)
         in
         (* the first level is a bit different from the others because of the
 	    lazyness of the programmer.
 	*)
-        M.WMap.update_all words (fun word freq ->
+        M.WMap.update_all words (fun _word freq ->
             l0 +. (l1 *. (freq /. null_context_freq)) ) ;
         M.CMap.iter
-          (fun gram child -> estimate_at_context child words lambdas)
+          (fun _gram child -> estimate_at_context child words lambdas)
           childs
 
   (* go down to the max level where the word can be found *)
@@ -272,7 +272,7 @@ module Make (M : Maps) :
     log (aux trie context 0.0)
 
   (* TODO is this function used? *)
-  let freqs trie word context =
+  let _freqs trie word context =
     let rec aux node context acc =
       let words = get_words_from_node node in
       try
